@@ -25,8 +25,21 @@ func AdminOnly(fn exrouter.HandlerFunc) exrouter.HandlerFunc {
 			if owner == ctx.Msg.Author.ID {
 				fn(ctx)
 			} else {
-				ctx.Reply("Could not authenticate you! Have the guild owner set an admin role.")
+				ctx.Reply("Could not authenticate you! Have the server owner set an admin role.")
 			}
+		}
+	}
+}
+
+func GuildOwnerOnly(fn exrouter.HandlerFunc) exrouter.HandlerFunc {
+	return func(ctx *exrouter.Context) {
+		log.Println("Attempting to authenticate a guild owner command")
+		guild, _ := ctx.Guild(ctx.Msg.GuildID)
+		owner := guild.OwnerID
+		if owner == ctx.Msg.Author.ID {
+			fn(ctx)
+		} else {
+			ctx.Reply("Please ask the server owner to run this command for you.")
 		}
 	}
 }
