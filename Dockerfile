@@ -8,8 +8,8 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-COPY * .
+ADD . .
 
 RUN go build -o /docker-bot-entrypoint
 
-CMD ["/docker-bot-entrypoint"]
+ENTRYPOINT ["/docker-bot-entrypoint"]
