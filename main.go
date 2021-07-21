@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	"github.com/wpi-25/scribe/commands"
+	"github.com/wpi-25/scribe/db"
 
 	"github.com/Necroforger/dgrouter/exrouter"
 )
@@ -20,6 +22,12 @@ func main() {
 	s, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	// Initialize Database
+	err = db.Connect()
+	if err != nil {
+		log.Fatalln(fmt.Sprintf("Could not connect to database %s", err))
 	}
 
 	// Initialize Command Router
