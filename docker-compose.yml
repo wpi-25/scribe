@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+    bot:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: scribe_bot
+        container_name: scribe-bot
+        # For simplicity, you should copy .env.example to .env and set the environment variables there
+        env_file:
+            - .env
+        environment:
+            # This is set here to override the value in .env to make sure it can talk to the database
+            DATABASE_URL: postgres://scribe:scribe@scribe-db/scribe?sslmode=disable
+        restart: unless-stopped
+        depends_on: db
+
+    db:
+        image: postgres:alpine
+        container_name: scribe-db
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: scribe
+            POSTGRES_USER: scribe
+            POSTGRES_PASSWORD: scribe
+        # Uncomment the following lines if you want to access the database from the outside network
+        # This might be useful when develping and not wanting to manage the database as a service
+        # However it is not recommended otherwise as it leaves the database open to any other process on the host or network
+        # ports:
+        #     - "5432:5432"
