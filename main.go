@@ -34,6 +34,8 @@ func main() {
 	router := exrouter.New()
 
 	commands.MetaCommands(router)
+	commands.InviteCommands(router)
+	commands.AdminCommands(router)
 
 	// Add command handler to message listener
 	s.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
