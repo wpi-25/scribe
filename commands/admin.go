@@ -58,8 +58,15 @@ func minPerms(ctx *exrouter.Context) {
 			if err != nil {
 				ctx.Reply(fmt.Sprintf("Could not update settings: %s", err))
 				log.Println(err)
+				return
 			}
 		}
+	} else {
+		_, err := db.DB.Exec("UPDATE guild_settings SET min_role_id=$1 WHERE guild_id=$2", roleId, ctx.Msg.GuildID)
+		if err != nil {
+			ctx.Reply(fmt.Sprintf("Could not update settings: %s", err))
+			return
+		}
 	}
-
+	ctx.Reply("Done.")
 }
