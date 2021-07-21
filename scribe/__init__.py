@@ -8,7 +8,7 @@ import logging
 from . import config
 
 logger = logging.getLogger("discord")
-logger.setLevel(logger.warn)
+logger.setLevel(logging.WARN)
 stdoutHandler = logging.StreamHandler(stream=sys.stdout)
 stdoutHandler.setFormatter(
     logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
@@ -16,7 +16,7 @@ stdoutHandler.setFormatter(
 logger.addHandler(stdoutHandler)
 
 botLogger = logging.getLogger("scribe")
-botLogger.setLevel(logger.info)
+botLogger.setLevel(logging.INFO)
 logger.addHandler(stdoutHandler)
 
 class Scribe(commands.Bot):
