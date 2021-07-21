@@ -14,7 +14,8 @@ services:
             # This is set here to override the value in .env to make sure it can talk to the database
             DATABASE_URL: postgres://scribe:scribe@scribe-db/scribe?sslmode=disable
         restart: unless-stopped
-        depends_on: db
+        depends_on:
+            - db
 
     db:
         image: postgres:alpine

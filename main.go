@@ -16,7 +16,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalln("Could not load environment")
+		log.Println("WARN: Could not load environment")
 	}
 	// Initialize Bot
 	s, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
