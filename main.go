@@ -7,10 +7,10 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
+	"github.com/lus/dgc"
 	"github.com/wpi-25/scribe/commands"
 	"github.com/wpi-25/scribe/db"
-
-	"github.com/Necroforger/dgrouter/exrouter"
+	"github.com/wpi-25/scribe/middleware"
 )
 
 func main() {
@@ -31,16 +31,27 @@ func main() {
 	}
 
 	// Initialize Command Router
-	router := exrouter.New()
+	router := dgc.Create(&dgc.Router{
+		Prefixes: []string{
+			os.Getenv("DISCORD_PREFIX"),
+		},
+		BotsAllowed: false,
+		PingHandler: func(c *dgc.Ctx) {
+			c.RespondText(fmt.Sprintf("Try `%shelp`!", os.Getenv("DISCORD_PREFIX")))
+		},
+	})
+
+	router.RegisterMiddleware(middleware.AdminOnly)
+	router.RegisterMiddleware(middleware.GuildOwnerOnly)
+
+	router.RegisterDefaultHelpCommand(s, nil)
 
 	commands.MetaCommands(router)
 	commands.InviteCommands(router)
 	commands.AdminCommands(router)
 
 	// Add command handler to message listener
-	s.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
-		router.FindAndExecute(s, os.Getenv("DISCORD_PREFIX"), s.State.User.ID, m.Message)
-	})
+	router.Initialize(s)
 
 	err = s.Open()
 	if err != nil {

@@ -22,6 +22,7 @@ require (
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kshvakov/clickhouse v1.3.4 // indirect
 	github.com/lib/pq v1.10.2 // indirect
+	github.com/lus/dgc v1.1.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/openzipkin/zipkin-go v0.1.1 // indirect
 	github.com/prometheus/client_golang v0.8.0 // indirect
@@ -29,5 +30,6 @@ require (
 	github.com/prometheus/procfs v0.0.0-20180920065004-418d78d0b9a7 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
+	golang.org/x/tools v0.1.5 // indirect
 	gopkg.in/ini.v1 v1.39.0 // indirect
 )
