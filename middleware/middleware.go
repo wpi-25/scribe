@@ -41,6 +41,7 @@ func AdminOnly(next dgc.ExecutionHandler) dgc.ExecutionHandler {
 				for _, role := range memberRoles {
 					if role == min_role_id.String {
 						next(c)
+						return
 					}
 				}
 				c.RespondText("You don't have permissions!")
