@@ -5,68 +5,82 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Necroforger/dgrouter/exrouter"
-	a "github.com/wpi-25/scribe/args"
+	"github.com/lus/dgc"
 	"github.com/wpi-25/scribe/db"
-	"github.com/wpi-25/scribe/middleware"
 )
 
-func AdminCommands(r *exrouter.Route) {
+func AdminCommands(r *dgc.Router) {
 	log.Println("Initializing Admin Commands")
-	r.Use(middleware.AdminOnly)
-	r.On("void", voidInvite).Desc("Deletes an invite")
-	r.Group(func(r *exrouter.Route) {
-		r.Cat("Owner")
-		//r.Use(middleware.GuildOwnerOnly)
-		r.On("minperms", minPerms).Desc("Sets the minimum role needed for admin commands. Server Owner Only")
+	r.RegisterCmd(&dgc.Command{
+		Name: "void",
+
+		Description: "Voids an invite",
+		Usage:       "void <code>",
+		Example:     "void djgHW23",
+		Handler:     voidInvite,
+
+		Flags: []string{
+			"admin",
+		},
+	})
+
+	r.RegisterCmd(&dgc.Command{
+		Name: "minperms",
+
+		Description: "Sets the minimum permissions for admin actions",
+		Usage:       "minperms <@role>",
+		Example:     "minperms @Admin",
+		Handler:     minPerms,
+
+		Flags: []string{
+			"owner",
+		},
 	})
 }
 
-func voidInvite(ctx *exrouter.Context) {
-	args := exrouter.ParseArgs(ctx.Msg.Content)
+func voidInvite(ctx *dgc.Ctx) {
 
-	code := args.Get(1)
+	args := ctx.Arguments
 
-	_, err := ctx.Ses.InviteDelete(code)
+	code := args.Get(0)
+
+	_, err := ctx.Session.InviteDelete(code.Raw())
 	if err != nil {
-		ctx.Reply(fmt.Sprintf("Could not delete invite: %s", err))
+		ctx.RespondText(fmt.Sprintf("Could not delete invite: %s", err))
 	} else {
-		ctx.Reply("Done")
+		ctx.RespondText("Done")
 	}
 }
 
-func minPerms(ctx *exrouter.Context) {
-	args := exrouter.ParseArgs(ctx.Msg.Content)
-	roleId, err := a.ParseRoleIDFromMention(args.Get(1))
-	if err != nil {
-		ctx.Reply(err)
-		return
-	}
+func minPerms(ctx *dgc.Ctx) {
+	args := ctx.Arguments
 
-	ctx.Reply(roleId)
+	roleId := args.Get(1).AsRoleMentionID()
 
-	row := db.DB.QueryRowx("SELECT guild_id FROM guild_settings WHERE guild_id = $1", ctx.Msg.GuildID)
+	ctx.RespondText(roleId)
+
+	row := db.DB.QueryRowx("SELECT guild_id FROM guild_settings WHERE guild_id = $1", ctx.Event.GuildID)
 	var guild_id string
-	err = row.Scan(&guild_id)
+	err := row.Scan(&guild_id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			settings := db.GuildSettings{
-				GuildId:   ctx.Msg.GuildID,
+				GuildId:   ctx.Event.GuildID,
 				MinRoleId: roleId,
 			}
 			_, err := db.DB.Exec("INSERT INTO guild_settings (guild_id, min_role_id) VALUES ($1, $2)", settings.GuildId, settings.MinRoleId)
 			if err != nil {
-				ctx.Reply(fmt.Sprintf("Could not update settings: %s", err))
+				ctx.RespondText(fmt.Sprintf("Could not update settings: %s", err))
 				log.Println(err)
 				return
 			}
 		}
 	} else {
-		_, err := db.DB.Exec("UPDATE guild_settings SET min_role_id=$1 WHERE guild_id=$2", roleId, ctx.Msg.GuildID)
+		_, err := db.DB.Exec("UPDATE guild_settings SET min_role_id=$1 WHERE guild_id=$2", roleId, ctx.Event.GuildID)
 		if err != nil {
-			ctx.Reply(fmt.Sprintf("Could not update settings: %s", err))
+			ctx.RespondText(fmt.Sprintf("Could not update settings: %s", err))
 			return
 		}
 	}
-	ctx.Reply("Done.")
+	ctx.RespondText("Done.")
 }
