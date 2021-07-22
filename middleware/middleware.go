@@ -36,6 +36,14 @@ func AdminOnly(next dgc.ExecutionHandler) dgc.ExecutionHandler {
 				} else {
 					c.RespondText("Could not authenticate you! Have the server owner set an admin role.")
 				}
+			} else {
+				memberRoles := c.Event.Member.Roles
+				for _, role := range memberRoles {
+					if role == min_role_id.String {
+						next(c)
+					}
+				}
+				c.RespondText("You don't have permissions!")
 			}
 		} else {
 			next(c)
