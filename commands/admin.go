@@ -36,6 +36,18 @@ func AdminCommands(r *dgc.Router) {
 			"owner",
 		},
 	})
+
+	r.RegisterCmd(&dgc.Command{
+		Name: "listinvites",
+
+		Description: "Lists managed invites",
+		Usage:       "listinvites",
+		Handler:     listInvites,
+
+		Flags: []string{
+			"admin",
+		},
+	})
 }
 
 func voidInvite(ctx *dgc.Ctx) {
@@ -43,6 +55,7 @@ func voidInvite(ctx *dgc.Ctx) {
 	args := ctx.Arguments
 
 	code := args.Get(0)
+	ctx.RespondText(code.Raw())
 
 	_, err := ctx.Session.InviteDelete(code.Raw())
 	if err != nil {
@@ -83,4 +96,36 @@ func minPerms(ctx *dgc.Ctx) {
 		}
 	}
 	ctx.RespondText("Done.")
+}
+
+func listInvites(c *dgc.Ctx) {
+	rows, err := db.DB.Queryx("SELECT * FROM invites WHERE guild_id = $1", c.Event.GuildID)
+	if err != nil {
+		c.RespondText(fmt.Sprintf("Could not get a list of invite reasons."))
+	}
+
+	var invites []InviteWReason
+
+	for rows.Next() {
+		var invite InviteWReason
+		err = rows.StructScan(&invite)
+	}
+
+	text := "**Invites**"
+
+	for _, i := range invites {
+		log.Printf("%s\t <@%s>, <#%s>, %s", i.Code, i.UserCreated, i.Channel, i.Reason)
+		text += fmt.Sprintf("%s\t <@%s>, <#%s>, %s", i.Code, i.UserCreated, i.Channel, i.Reason)
+	}
+	c.RespondText(text)
+}
+
+type InviteWReason struct {
+	Code        string
+	GuildID     string `db:"guild_id"`
+	CreatedAt   string `db:"created_at"`
+	UserCreated string `db:"user_created"`
+	Channel     string `db:"target_channel"`
+	MaxUses     int    `db:"max_uses"`
+	Reason      string
 }
