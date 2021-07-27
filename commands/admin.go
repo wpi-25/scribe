@@ -99,19 +99,27 @@ func minPerms(ctx *dgc.Ctx) {
 }
 
 func listInvites(c *dgc.Ctx) {
+	log.Println("Fetching invites")
 	rows, err := db.DB.Queryx("SELECT * FROM invites WHERE guild_id = $1", c.Event.GuildID)
 	if err != nil {
 		c.RespondText(fmt.Sprintf("Could not get a list of invite reasons."))
 	}
+	log.Println("done")
 
 	var invites []InviteWReason
 
+	log.Println("Iterating through invites")
 	for rows.Next() {
 		var invite InviteWReason
 		err = rows.StructScan(&invite)
+		log.Println(fmt.Sprintf("Code: %s", invite.Code))
+		invites = append(invites, invite)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
-	text := "**Invites**"
+	text := "**Invites\n**"
 
 	for _, i := range invites {
 		log.Printf("%s\t <@%s>, <#%s>, %s", i.Code, i.UserCreated, i.Channel, i.Reason)
@@ -121,11 +129,12 @@ func listInvites(c *dgc.Ctx) {
 }
 
 type InviteWReason struct {
-	Code        string
+	Code        string `db:"code"`
 	GuildID     string `db:"guild_id"`
 	CreatedAt   string `db:"created_at"`
 	UserCreated string `db:"user_created"`
 	Channel     string `db:"target_channel"`
 	MaxUses     int    `db:"max_uses"`
 	Reason      string
+	Id          int `db:"id"`
 }
