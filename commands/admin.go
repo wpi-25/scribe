@@ -115,7 +115,10 @@ func listInvites(c *dgc.Ctx) {
 		log.Println(fmt.Sprintf("Code: %s", invite.Code))
 		invites = append(invites, invite)
 		if err != nil {
-			log.Println(err)
+			if err == sql.ErrNoRows {
+				c.RespondText("No invites recorded, try adding some!")
+				return
+			}
 		}
 	}
 
