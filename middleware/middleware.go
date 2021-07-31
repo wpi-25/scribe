@@ -20,9 +20,9 @@ func AdminOnly(next dgc.ExecutionHandler) dgc.ExecutionHandler {
 		if is_admin {
 			log.Println("Attempting to authenticate an admin command")
 
-			row := db.DB.QueryRow("SELECT min_role_id FROM guild_settings WHERE guild_id = ?", c.Event.GuildID)
+			row := db.DB.QueryRow("SELECT min_role_id FROM guild_settings WHERE guild_id = $1", c.Event.GuildID)
 			var min_role_id sql.NullString
-			err := row.Scan(min_role_id)
+			err := row.Scan(&min_role_id)
 			if err != nil {
 				c.RespondText(fmt.Sprintf("Could not Scan: %s", err))
 				return
