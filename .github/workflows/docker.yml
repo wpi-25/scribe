@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Add .env file
+        run: touch .env
       - name: Build the container
         # We include some build information in docker-compose.yml so
         # running the build this way makes sure that is set up correctly.
