@@ -17,7 +17,7 @@ func InviteCommands(r *dgc.Router) {
 
 		Description: "Creates an invite to the server",
 		Usage:       "invite <#channel> <duration> <uses> <reason>",
-		Example:     "invite #welcome 1h30m 0 Single-use for new member",
+		Example:     "invite #welcome 1h30m 1 Single-use for new member",
 
 		Handler: createInviteCommand,
 	})
