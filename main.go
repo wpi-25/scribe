@@ -13,6 +13,12 @@ import (
 	"github.com/wpi-25/scribe/middleware"
 )
 
+type BotContext struct {
+	Invites map[string][]*discordgo.Invite
+}
+
+var BotCtx BotContext
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -53,9 +59,26 @@ func main() {
 	// Add command handler to message listener
 	router.Initialize(s)
 
+	s.StateEnabled = true
+
 	err = s.Open()
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	BotCtx = BotContext{}
+	for _, guild := range s.State.Guilds {
+		log.Println(fmt.Sprintf("Storing invites for %s", guild.Name))
+		for _, chann := range guild.Channels {
+			invs, err := s.ChannelInvites(chann.ID)
+			if err != nil {
+				log.Println(err)
+			} else {
+				for _, inv := range invs {
+					_ = append(BotCtx.Invites[guild.ID], inv)
+				}
+			}
+		}
 	}
 
 	log.Println("Bot running")
